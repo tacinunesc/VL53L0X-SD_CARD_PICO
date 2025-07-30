@@ -49,6 +49,7 @@ O sistema opera através de uma máquina de estados bem definida organizada em u
 - Sincronização forçada do arquivo a cada 50 amostras para garantir que dados sejam salvos mesmo em caso de falha;
 - Sistema de numeração automática de arquivos com verificação de conflitos e limite de segurança de 9999 arquivos;
 - Endereço do MPU6050 configurado para 0x68 (padrão);
+- Código Grafico.py em python 3 executado no google colab para análise dos dados no domínio do tempo e com unidades convertidas
 
 ## :camera: GIF mostrando o funcionamento do programa na placa Raspberry Pi Pico
 <p align="center">
