@@ -1,3 +1,17 @@
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 1.5.1)
+set(toolchainVersion 13_2_Rel1)
+set(picotoolVersion 2.0.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
 # Generated Cmake Pico project file
 
 cmake_minimum_required(VERSION 3.13)
@@ -10,17 +24,25 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(Trabalho_SE_12 C CXX ASM)
+project(dist_card C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(${PROJECT_NAME} Trabalho_SE_12.c hw_config.c lib/ssd1306.c)
+add_executable(${PROJECT_NAME} 
+    dist_card.c 
+    hw_config.c 
+    servo.c 
+    vl53l0x.c
+    inc/ssd1306.c
+    inc/ssd1306_fonts.c
+    inc/ssd1306_bitmaps.c
+    )
 add_subdirectory(lib/FatFs_SPI)  
 
-pico_set_program_name(${PROJECT_NAME} "Trabalho_SE_12")
+pico_set_program_name(${PROJECT_NAME} "dist_card")
 pico_set_program_version(${PROJECT_NAME} "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
