@@ -46,7 +46,7 @@ O programa realiza as seguintes ações:
 
 1. Inicialização dos periféricos
 - Configura o barramento I2C0 (SDA_I2C = 0 | SCL_I2C = 1) para o sensor de distancia
-- Gpio 2 para o servo motor
+- No barramento I2C1 - Gpio 2 para o servo motor
 - Gpio: 16 | 19 | 18 | 17 | 22 |
 - Inicializa o sensor vl53l0x e o display OLED SSD1306
 - Configura os pinos dos LEDs RGB
