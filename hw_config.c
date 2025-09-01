@@ -1,75 +1,88 @@
 
-#include <assert.h>
-#include <string.h>
-//
-#include "my_debug.h"
-//
-#include "hw_config.h"
-//
-#include "ff.h" /* Obtains integer types */
-//
-#include "diskio.h" /* Declarations of disk functions */
+// Bibliotecas padrão
+#include <assert.h>     // Para verificações de assertividade em tempo de execução
+#include <string.h>     // Para manipulação de strings
+
+// Bibliotecas do projeto
+#include "my_debug.h"   // Biblioteca personalizada para depuração
+#include "hw_config.h"  // Configuração de hardware específica do projeto
+
+// Bibliotecas do sistema de arquivos FAT
+#include "ff.h"         // Tipos inteiros e funções do sistema de arquivos FAT
+#include "diskio.h"     // Declarações de funções de acesso ao disco
 
 /* 
-This example assumes the following hardware configuration:
+Configuração de hardware assumida para comunicação SPI com cartão MicroSD:
 
-|       | SPI0  | GPIO  | Pin   | SPI       | MicroSD   | Description            | 
-| ----- | ----  | ----- | ---   | --------  | --------- | ---------------------- |
-| MISO  | RX    | 16    | 21    | DO        | DO        | Master In, Slave Out   |
-| MOSI  | TX    | 19    | 25    | DI        | DI        | Master Out, Slave In   |
-| SCK   | SCK   | 18    | 24    | SCLK      | CLK       | SPI clock              |
-| CS0   | CSn   | 17    | 22    | SS or CS  | CS        | Slave (or Chip) Select |
-| DET   |       | 22    | 29    |           | CD        | Card Detect            |
-| GND   |       |       | 18,23 |           | GND       | Ground                 |
-| 3v3   |       |       | 36    |           | 3v3       | 3.3 volt power         |
-
+|       | SPI0  | GPIO  | Pin   | SPI       | MicroSD   | Descrição               | 
+| ----- | ----  | ----- | ---   | --------  | --------- | ----------------------- |
+| MISO  | RX    | 16    | 21    | DO        | DO        | Dados do cartão para MCU|
+| MOSI  | TX    | 19    | 25    | DI        | DI        | Dados da MCU para cartão|
+| SCK   | SCK   | 18    | 24    | SCLK      | CLK       | Clock do barramento SPI |
+| CS0   | CSn   | 17    | 22    | SS ou CS  | CS        | Seleção do cartão SD    |
+| DET   |       | 22    | 29    |           | CD        | Detecção de cartão      |
+| GND   |       |       | 18,23 |           | GND       | Terra                   |
+| 3v3   |       |       | 36    |           | 3v3       | Alimentação 3.3V        |
 */
 
-// Hardware Configuration of SPI "objects"
-// Note: multiple SD cards can be driven by one SPI if they use different slave
-// selects.
-static spi_t spis[] = {  // One for each SPI.
+// ========================== Configuração de SPI ==========================
+
+// Array de configurações para interfaces SPI
+static spi_t spis[] = {
     {
-        .hw_inst = spi0,  // SPI component
-        .miso_gpio = 16,  // GPIO number (not Pico pin number)
-        .mosi_gpio = 19,
-        .sck_gpio = 18,
+        .hw_inst = spi0,      // Instância de hardware SPI utilizada
+        .miso_gpio = 16,      // GPIO para MISO (entrada de dados)
+        .mosi_gpio = 19,      // GPIO para MOSI (saída de dados)
+        .sck_gpio = 18,       // GPIO para clock SPI
+        .baud_rate = 1000000  // Taxa de transmissão: 1 Mbps
+        // Alternativa comentada: 25 Mbps (frequência real: ~20.8 MHz)
+    }
+};
 
-        // .baud_rate = 1000 * 1000
-        .baud_rate = 1000 * 1000
-        // .baud_rate = 25 * 1000 * 1000 // Actual frequency: 20833333.
-    }};
+// ========================== Configuração do cartão SD ==========================
 
-// Hardware Configuration of the SD Card "objects"
-static sd_card_t sd_cards[] = {  // One for each SD card
+// Array de configurações para cartões SD
+static sd_card_t sd_cards[] = {
     {
-        .pcName = "0:",   // Name used to mount device
-        .spi = &spis[0],  // Pointer to the SPI driving this card
-        .ss_gpio = 17,    // The SPI slave select GPIO for this SD card
-        .use_card_detect = false,
-        .card_detect_gpio = 22,  // Card detect
-        .card_detected_true = -1  // What the GPIO read returns when a card is
-                                 // present.
-    }};
+        .pcName = "0:",             // Nome lógico do dispositivo (usado para montagem)
+        .spi = &spis[0],            // Ponteiro para a interface SPI correspondente
+        .ss_gpio = 17,              // GPIO para seleção do cartão (CS)
+        .use_card_detect = false,   // Desativa verificação de presença do cartão
+        .card_detect_gpio = 22,     // GPIO que poderia ser usado para detectar o cartão
+        .card_detected_true = -1    // Valor esperado para indicar presença do cartão
+    }
+};
 
-/* ********************************************************************** */
-size_t sd_get_num() { return count_of(sd_cards); }
+// ========================== Funções de acesso ==========================
+
+// Retorna o número de cartões SD configurados
+size_t sd_get_num() {
+    return count_of(sd_cards);
+}
+
+// Retorna o ponteiro para o cartão SD de índice 'num'
 sd_card_t *sd_get_by_num(size_t num) {
-    assert(num <= sd_get_num());
+    assert(num <= sd_get_num()); // Garante que o índice é válido
     if (num <= sd_get_num()) {
-        return &sd_cards[num];
+        return &sd_cards[num];   // Retorna ponteiro para o cartão
     } else {
-        return NULL;
-    }
-}
-size_t spi_get_num() { return count_of(spis); }
-spi_t *spi_get_by_num(size_t num) {
-    assert(num <= spi_get_num());
-    if (num <= spi_get_num()) {
-        return &spis[num];
-    } else {
-        return NULL;
+        return NULL;             // Retorna NULL se índice inválido
     }
 }
 
-/* [] END OF FILE */
+// Retorna o número de interfaces SPI configuradas
+size_t spi_get_num() {
+    return count_of(spis);
+}
+
+// Retorna o ponteiro para a interface SPI de índice 'num'
+spi_t *spi_get_by_num(size_t num) {
+    assert(num <= spi_get_num()); // Garante que o índice é válido
+    if (num <= spi_get_num()) {
+        return &spis[num];        // Retorna ponteiro para a interface SPI
+    } else {
+        return NULL;              // Retorna NULL se índice inválido
+    }
+}
+
+
