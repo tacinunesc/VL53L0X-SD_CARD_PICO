@@ -16,7 +16,7 @@ display Oled inclusos na placa Raspberry Pi Pico W (BItDogLab).
 </div>
 
 ## 🛠️ Estrutura do projeto
-- dist_card.c – Programa principal em C que faz leitura de presença, com base nesta informação utiliza o servo motor girar para direita caso haja presença detectada a menos de 10cm e para a esquerda de 10cm ou mais e essa informação é exibida no porta serial e no visor oled da BitDogLab e grava no SD Card a distancia, o estado do servo e tempo
+- dist_card.c – Programa principal em C que faz leitura de presença, com base nesta informação utiliza o servo motor girar para direita caso haja presença detectada for menor que 10cm e para a esquerda se for maior  e essa informação é exibida no porta serial e no visor oled da BitDogLab e grava no SD Card a distancia, o estado do servo e tempo
 - vl53l0x.c - Onde fica as definições do sensor de distancia
 - servo.c - Onde fica as definições do atuador servo motor
 - Pasta inc - Onde esta localizada as informações da oled
